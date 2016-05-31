@@ -4469,56 +4469,21 @@ if(msCounter != 0) msCounter--;
 void APP_DeviceAudioMIDITasks()
 {
 
-# 77
-uint8_t scan_pitch = 0x3C, velocity = 0;
-bool bscan = 0;
-bscan = scan_task(&scan_pitch, &velocity);
-if (bscan) {
-midiData.Val = 0;
-midiData.CableNumber = 0;
-midiData.CodeIndexNumber = 0x9;
-midiData.DATA_0 = 0x90;
-midiData.DATA_1 = scan_pitch;
-midiData.DATA_2 = velocity;
-ble_pitch = scan_pitch;
-ble_velocity = velocity;
-
-
-TMR2 = TMR2 | 0x80;
-ble_timestamp = TMR2;
+ble_pitch = 0x47;
+ble_velocity = 0x40;
 SendMidiData(ble_header, ble_timestamp, ble_midi_status, ble_pitch, ble_velocity);
 
-if( USBDeviceState == CONFIGURED_STATE || UCONbits.SUSPND)
-{
-if(!(USBRxHandle==0?0:((volatile BDT_ENTRY*)USBRxHandle)->STAT.UOWN))
-{
-USBRxHandle = USBTransferOnePacket(1,0,(uint8_t*)&ReceivedDataBuffer,64);
-}
-USBTxHandle = USBTransferOnePacket(1,1,(uint8_t*)&midiData,4);
-}
-}
+ble_timestamp = (ble_timestamp + 1) | 0x80;
 
-# 128
-if (msCounter == 0 && !sentNoteOff && !(USBTxHandle==0?0:((volatile BDT_ENTRY*)USBTxHandle)->STAT.UOWN)) {
+_delay((unsigned long)((500)*(16000000/4000.0)));
 
-msCounter = 100;
-midiData.Val = 0;
-
-midiData.CableNumber = 0;
-midiData.CodeIndexNumber = 0x8;
-midiData.DATA_0 = 0x90;
-midiData.DATA_1 = pitch++;
-midiData.DATA_2 = 0x00;
-ble_pitch = pitch;
+ble_pitch = 0x47;
 ble_velocity = 0x00;
-
-if(pitch == 0x49)
-pitch = 0x3C;
-
-TMR2 = TMR2 | 0x80;
-ble_timestamp = TMR2;
 SendMidiData(ble_header, ble_timestamp, ble_midi_status, ble_pitch, ble_velocity);
-sentNoteOff = 1;
+
+ble_timestamp = (ble_timestamp + 1) | 0x80;
+
+_delay((unsigned long)((500)*(16000000/4000.0)));
 
 if( USBDeviceState == CONFIGURED_STATE || UCONbits.SUSPND)
 {
@@ -4528,5 +4493,6 @@ USBRxHandle = USBTransferOnePacket(1,0,(uint8_t*)&ReceivedDataBuffer,64);
 }
 USBTxHandle = USBTransferOnePacket(1,1,(uint8_t*)&midiData,4);
 }
-}
+
+# 152
 }
